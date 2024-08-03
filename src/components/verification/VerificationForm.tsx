@@ -1,4 +1,3 @@
-import './VerificationForm.css';
 import React, { FormEvent, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
@@ -73,7 +72,7 @@ const VerificationForm: React.FC = () => {
     <div>
       <h1>Verify Your Account</h1>
       {successMessage ? (
-        <div className="success-message">
+        <div className="text-green-500">
           <p>{successMessage}</p>
           <p>You will be redirected to the login page shortly...</p>
         </div>
@@ -100,10 +99,10 @@ const VerificationForm: React.FC = () => {
               required
             />
             {validationErrors.code && (
-              <p className="error">{validationErrors.code}</p>
+              <p className="text-red-500">{validationErrors.code}</p>
             )}
           </div>
-          {error && <p className="error">{error}</p>}
+          {error && <p className="text-red-500">{error}</p>}
           <button type="submit" disabled={isSubmitting}>
             {isSubmitting ? 'Verifying...' : 'Verify'}
           </button>

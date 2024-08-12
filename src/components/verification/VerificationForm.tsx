@@ -1,6 +1,7 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios, { AxiosError } from 'axios';
+import VerificationStatus from './VerificationStatus';
 
 interface ErrorResponse {
   errors?: Record<string, string>;
@@ -11,7 +12,16 @@ interface SuccessResponse {
   message: string;
 }
 
+interface VerificationStatusResponse {
+  isVerified: boolean;
+}
+
+interface VerificationStatusErrorResponse {
+  error?: string;
+}
+
 const VerificationForm: React.FC = () => {
+  const [isVerified, setIsVerified] = useState<boolean>(false);
   const [email, setEmail] = useState<string>('');
   const [code, setCode] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -28,8 +38,33 @@ const VerificationForm: React.FC = () => {
     const emailParam = params.get('email');
     if (emailParam) {
       setEmail(emailParam);
+      checkVerificationStatus(emailParam).then((r) => r);
     }
   }, [location]);
+
+  const checkVerificationStatus = async (email: string) => {
+    try {
+      const response = await axios.get<VerificationStatusResponse>(
+        `http://localhost:8080/api/verification/verify?email=${email}`
+      );
+      setIsVerified(response.data.isVerified);
+      setSuccessMessage(
+        response.data.isVerified ? 'Your account is already verified.' : ''
+      );
+    } catch (err) {
+      const error = err as AxiosError<VerificationStatusErrorResponse>;
+      if (error.response?.data) {
+        const responseData = error.response.data;
+        if (responseData.error) {
+          setError(responseData.error);
+        } else {
+          setError('Error checking verification status. Please try again.');
+        }
+      } else {
+        setError('Error checking verification status. Please try again.');
+      }
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -47,6 +82,7 @@ const VerificationForm: React.FC = () => {
         }
       );
       setSuccessMessage(response.data.message);
+      setIsVerified(true);
       // Redirect to login page after 3 seconds
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
@@ -71,11 +107,8 @@ const VerificationForm: React.FC = () => {
   return (
     <div>
       <h1>Verify Your Account</h1>
-      {successMessage ? (
-        <div className="text-green-500">
-          <p>{successMessage}</p>
-          <p>You will be redirected to the login page shortly...</p>
-        </div>
+      {isVerified || successMessage ? (
+        <VerificationStatus isVerified={isVerified} message={successMessage} />
       ) : (
         <form onSubmit={handleSubmit}>
           <div>

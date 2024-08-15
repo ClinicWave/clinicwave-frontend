@@ -5,7 +5,7 @@ import VerificationStatus from './VerificationStatus';
 
 interface ErrorResponse {
   errors?: Record<string, string>;
-  error?: string;
+  errorMessage?: string;
 }
 
 interface SuccessResponse {
@@ -17,7 +17,7 @@ interface VerificationStatusResponse {
 }
 
 interface VerificationStatusErrorResponse {
-  error?: string;
+  errorMessage?: string;
 }
 
 const VerificationForm: React.FC = () => {
@@ -55,8 +55,8 @@ const VerificationForm: React.FC = () => {
       const error = err as AxiosError<VerificationStatusErrorResponse>;
       if (error.response?.data) {
         const responseData = error.response.data;
-        if (responseData.error) {
-          setError(responseData.error);
+        if (responseData.errorMessage) {
+          setError(responseData.errorMessage);
         } else {
           setError('Error checking verification status. Please try again.');
         }
@@ -91,8 +91,8 @@ const VerificationForm: React.FC = () => {
         const responseData = error.response.data;
         if (responseData.errors) {
           setValidationErrors(responseData.errors);
-        } else if (responseData.error) {
-          setError(responseData.error);
+        } else if (responseData.errorMessage) {
+          setError(responseData.errorMessage);
         } else {
           setError('An unexpected error occurred. Please try again.');
         }

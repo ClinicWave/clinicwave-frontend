@@ -14,6 +14,7 @@ interface SuccessResponse {
 
 interface VerificationStatusResponse {
   isVerified: boolean;
+  email: string;
 }
 
 interface VerificationStatusErrorResponse {
@@ -35,19 +36,19 @@ const VerificationForm: React.FC = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const emailParam = params.get('email');
-    if (emailParam) {
-      setEmail(emailParam);
-      checkVerificationStatus(emailParam).then((r) => r);
+    const tokenParam = params.get('token');
+    if (tokenParam) {
+      checkVerificationStatus(tokenParam).then((r) => r);
     }
   }, [location]);
 
-  const checkVerificationStatus = async (email: string) => {
+  const checkVerificationStatus = async (token: string) => {
     try {
       const response = await axios.get<VerificationStatusResponse>(
-        `http://localhost:8080/api/verification/verify?email=${email}`
+        `http://localhost:8080/api/verification/verify?token=${token}`
       );
       setIsVerified(response.data.isVerified);
+      setEmail(response.data.email);
       setSuccessMessage(
         response.data.isVerified ? 'Your account is already verified.' : ''
       );

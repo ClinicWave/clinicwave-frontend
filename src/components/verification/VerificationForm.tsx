@@ -26,7 +26,7 @@ const VerificationForm: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [code, setCode] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
@@ -49,7 +49,7 @@ const VerificationForm: React.FC = () => {
       );
       setIsVerified(response.data.isVerified);
       setEmail(response.data.email);
-      setSuccessMessage(
+      setMessage(
         response.data.isVerified ? 'Your account is already verified.' : ''
       );
     } catch (err) {
@@ -70,7 +70,7 @@ const VerificationForm: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccessMessage('');
+    setMessage('');
     setValidationErrors({});
     setIsSubmitting(true);
 
@@ -82,7 +82,7 @@ const VerificationForm: React.FC = () => {
           code,
         }
       );
-      setSuccessMessage(response.data.message);
+      setMessage(response.data.message);
       setIsVerified(true);
       // Redirect to login page after 3 seconds
       setTimeout(() => navigate('/login'), 3000);
@@ -108,8 +108,8 @@ const VerificationForm: React.FC = () => {
   return (
     <div>
       <h1>Verify Your Account</h1>
-      {isVerified || successMessage ? (
-        <VerificationStatus isVerified={isVerified} message={successMessage} />
+      {isVerified || message ? (
+        <VerificationStatus isVerified={isVerified} message={message} />
       ) : (
         <form onSubmit={handleSubmit}>
           <div>

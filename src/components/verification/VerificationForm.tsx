@@ -54,15 +54,18 @@ const VerificationForm: React.FC = () => {
       );
     } catch (err) {
       const error = err as AxiosError<VerificationStatusErrorResponse>;
-      if (error.response?.data) {
-        const responseData = error.response.data;
-        if (responseData.errorMessage) {
-          setError(responseData.errorMessage);
-        } else {
-          setError('Error checking verification status. Please try again.');
-        }
+      const status = error.response?.status;
+      const responseData = error.response?.data;
+      console.log(error);
+
+      if (status === 404) {
+        setMessage('Invalid verification link. Please try again.');
+      } else if (responseData?.errorMessage) {
+        setMessage(responseData.errorMessage);
+      } else if (error.code === 'ERR_NETWORK') {
+        setMessage('Unable to connect to the server. Please try again later.');
       } else {
-        setError('Error checking verification status. Please try again.');
+        setMessage('Error checking verification status. Please try again.');
       }
     }
   };

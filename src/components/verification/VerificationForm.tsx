@@ -26,7 +26,7 @@ const VerificationForm: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [code, setCode] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
@@ -49,20 +49,23 @@ const VerificationForm: React.FC = () => {
       );
       setIsVerified(response.data.isVerified);
       setEmail(response.data.email);
-      setSuccessMessage(
+      setMessage(
         response.data.isVerified ? 'Your account is already verified.' : ''
       );
     } catch (err) {
       const error = err as AxiosError<VerificationStatusErrorResponse>;
-      if (error.response?.data) {
-        const responseData = error.response.data;
-        if (responseData.errorMessage) {
-          setError(responseData.errorMessage);
-        } else {
-          setError('Error checking verification status. Please try again.');
-        }
+      const status = error.response?.status;
+      const responseData = error.response?.data;
+      console.log(error);
+
+      if (status === 404) {
+        setMessage('Invalid verification link. Please try again.');
+      } else if (responseData?.errorMessage) {
+        setMessage(responseData.errorMessage);
+      } else if (error.code === 'ERR_NETWORK') {
+        setMessage('Unable to connect to the server. Please try again later.');
       } else {
-        setError('Error checking verification status. Please try again.');
+        setMessage('Error checking verification status. Please try again.');
       }
     }
   };
@@ -70,7 +73,7 @@ const VerificationForm: React.FC = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccessMessage('');
+    setMessage('');
     setValidationErrors({});
     setIsSubmitting(true);
 
@@ -82,7 +85,7 @@ const VerificationForm: React.FC = () => {
           code,
         }
       );
-      setSuccessMessage(response.data.message);
+      setMessage(response.data.message);
       setIsVerified(true);
       // Redirect to login page after 3 seconds
       setTimeout(() => navigate('/login'), 3000);
@@ -108,8 +111,8 @@ const VerificationForm: React.FC = () => {
   return (
     <div>
       <h1>Verify Your Account</h1>
-      {isVerified || successMessage ? (
-        <VerificationStatus isVerified={isVerified} message={successMessage} />
+      {isVerified || message ? (
+        <VerificationStatus isVerified={isVerified} message={message} />
       ) : (
         <form onSubmit={handleSubmit}>
           <div>
